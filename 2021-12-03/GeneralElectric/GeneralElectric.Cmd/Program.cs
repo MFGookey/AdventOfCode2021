@@ -25,7 +25,7 @@ namespace GeneralElectric.Cmd
       );
 
       Console.WriteLine(calc.CalculateGamma() * calc.CalculateEpsilon());
-      
+      Console.WriteLine(calc.CalculateOxygenGeneratorRating() * calc.CalculateCO2ScrubberRating());
       _ = Console.ReadLine();
     }
   }

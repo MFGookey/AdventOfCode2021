@@ -20,16 +20,27 @@ namespace GeneralElectric.Core
       _readings = readings;
     }
 
-    public int CalculateGamma()
+    private BitArray CalculateByBitColumns(Func<int, int, bool> bumpOnes)
     {
-      // Gamma is comprised of the most commonly occurring bit in each column of readings converted to decimal.
-      var ones = new int[_readings.First().Readings.Count];
-      var zeroes = new int[ones.Length];
-      var result = new BitArray(ones.Length);
+      return CalculateByBitColumns(bumpOnes, _readings);
+    }
 
-      foreach (var reading in _readings)
+    private BitArray CalculateByBitColumns(Func<int, int, bool> bumpOnes, IEnumerable<IConsumptionReading> readings)
+    {
+      var readingLength = 1;
+
+      if (readings.Any())
       {
-        for (var i = 0; i < reading.Readings.Count; i++)
+        readingLength = readings.FirstOrDefault().Readings.Count;
+      }
+
+      var ones = new int[readingLength];
+      var zeroes = new int[readingLength];
+      var result = new BitArray(readingLength);
+
+      foreach (var reading in readings)
+      {
+        for (var i = 0; i < readingLength; i++)
         {
           if (reading.Readings[i])
           {
@@ -44,61 +55,78 @@ namespace GeneralElectric.Core
 
       for (var i = 0; i < ones.Length; i++)
       {
-        if (ones[i] > zeroes[i])
+        if (bumpOnes(ones[i], zeroes[i]))
         {
           // This is dumb but the order is reversed vs what we are expecting
-          result[ones.Length - i - 1] = true;
+          result[readingLength - i - 1] = true;
         }
-        else{
+        else
+        {
           // This is dumb but the order is reversed vs what we are expecting
-          result[ones.Length - i - 1] = false;
+          result[readingLength - i - 1] = false;
         }
       }
 
+      return result;
+    }
+
+    private int ConvertToInt(BitArray toConvert)
+    {
       int[] array = new int[1];
-      result.CopyTo(array, 0);
+      toConvert.CopyTo(array, 0);
       return array[0];
+    }
+
+    public int CalculateGamma()
+    {
+      var result = CalculateByBitColumns((one, zero) => one > zero);
+
+      return ConvertToInt(result);
     }
 
     public int CalculateEpsilon()
     {
       // Epsilon is comprised of the least commonly occurring bit in each column of readings converted to decimal.
-      var ones = new int[_readings.First().Readings.Count];
-      var zeroes = new int[ones.Length];
-      var result = new BitArray(ones.Length);
+      var result = CalculateByBitColumns((one, zero) => one <= zero);
+      return ConvertToInt(result);
+    }
 
-      foreach (var reading in _readings)
+    public int CalculateRatingByCriteria(Func<int, int, bool> bumpOnes)
+    {
+      var filteredResults = _readings;
+
+      for (int i = filteredResults.First().Readings.Count() - 1; i >= 0; i--)
       {
-        for (var i = 0; i < reading.Readings.Count; i++)
+
+        if (filteredResults.Count() == 1)
         {
-          if (reading.Readings[i])
-          {
-            ones[i]++;
-          }
-          else
-          {
-            zeroes[i]++;
-          }
+          // convert the filtered result reading into an int and return it.
+          var finalResult = new BitArray(filteredResults.First().Readings.Reverse().ToArray());
+          return ConvertToInt(finalResult);
         }
+        var precalculatedResults = CalculateByBitColumns(bumpOnes, filteredResults);
+        filteredResults = filteredResults.Where(result => result.Readings[result.Readings.Count - i - 1] == precalculatedResults[i]).ToList();
+        ;
       }
 
-      for (var i = 0; i < ones.Length; i++)
+      if (filteredResults.Count() == 1)
       {
-        if (ones[i] <= zeroes[i])
-        {
-          // This is dumb but the order is reversed vs what we are expecting
-          result[ones.Length - i - 1] = true;
-        }
-        else
-        {
-          // This is dumb but the order is reversed vs what we are expecting
-          result[ones.Length - i - 1] = false;
-        }
+        // convert the filtered result reading into an int and return it.
+        var finalResult = new BitArray(filteredResults.First().Readings.Reverse().ToArray());
+        return ConvertToInt(finalResult);
       }
 
-      int[] array = new int[1];
-      result.CopyTo(array, 0);
-      return array[0];
+      throw new Exception("Could not narrow down the filtered results to a single record");
+    }
+
+    public int CalculateOxygenGeneratorRating()
+    {
+      return CalculateRatingByCriteria((one, zero) => one >= zero);
+    }
+
+    public int CalculateCO2ScrubberRating()
+    {
+      return CalculateRatingByCriteria((one, zero) => one < zero);
     }
   }
 }

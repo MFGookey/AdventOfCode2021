@@ -7,6 +7,11 @@ namespace GeneralElectric.Core.Tests
 {
   public class ConsumptionCalculatorTests
   {
+    private static readonly int GammaIndex = 0;
+    private static readonly int EpsilonIndex = 1;
+    private static readonly int OxygenRatingIndex = 2;
+    private static readonly int ScrubberRatingIndex = 3;
+
     [Fact]
     void ConsumptionCalculator_GivenNonRectangularReadings_ThrowsArgumentException()
     {
@@ -22,35 +27,83 @@ namespace GeneralElectric.Core.Tests
     [Theory]
     [MemberData(nameof(Readings))]
 
-    void ConsumptionCalculator_GivenReadings_CalculatesCorrectly(
+    void ConsumptionCalculator_GivenReadings_CalculatesGammaCorrectly(
       IEnumerable<IConsumptionReading> readings,
-      int expectedGamma,
-      int expectedEpsilon
+      int[] expectedValues
+      )
+    {
+      var sut = new ConsumptionCalculator(readings);
+      Assert.Equal(expectedValues[GammaIndex], sut.CalculateGamma());
+    }
+
+    [Theory]
+    [MemberData(nameof(Readings))]
+    void ConsumptionCalculator_GivenReadings_CalculatesEpsilonCorrectly(
+      IEnumerable<IConsumptionReading> readings,
+      int[] expectedValues
       )
     {
       var sut = new ConsumptionCalculator(readings);
 
-      Assert.Equal(expectedGamma, sut.CalculateGamma());
-      Assert.Equal(expectedEpsilon, sut.CalculateEpsilon());
+      Assert.Equal(expectedValues[EpsilonIndex], sut.CalculateEpsilon());
     }
+
+    [Theory]
+    [MemberData(nameof(Readings))]
+    void ConsumptionCalculator_GivenReadings_CalculatesOxygenGeneratorRatingCorrectly(
+      IEnumerable<IConsumptionReading> readings,
+      int[] expectedValues
+      )
+    {
+      var sut = new ConsumptionCalculator(readings);
+
+      Assert.Equal(
+        expectedValues[OxygenRatingIndex],
+        sut.CalculateOxygenGeneratorRating()
+      );
+    }
+
+    [Theory]
+    [MemberData(nameof(Readings))]
+    void ConsumptionCalculator_GivenReadings_CalculatesCO2ScrubberRatingCorrectly(
+      IEnumerable<IConsumptionReading> readings,
+      int[] expectedValues
+      )
+    {
+      var sut = new ConsumptionCalculator(readings);
+
+      Assert.Equal(
+        expectedValues[ScrubberRatingIndex],
+        sut.CalculateCO2ScrubberRating()
+      );
+    }
+
 
     public static IEnumerable<object[]> Readings
     {
       get
       {
-        yield return new object[]
+        /*yield return new object[]
         {
           new[] {new ConsumptionReading("0")},
-          0,
-          1
+          new[] {
+            0,
+            1,
+            0,
+            1
+          }
         };
 
         yield return new object[]
         {
           new[] {new ConsumptionReading("1")},
-          1,
-          0
-        };
+          new[] {
+            1,
+            0,
+            1,
+            0
+          }
+        };*/
 
         yield return new object[]
         {
@@ -68,8 +121,12 @@ namespace GeneralElectric.Core.Tests
             new ConsumptionReading("00010"),
             new ConsumptionReading("01010")
           },
-          22,
-          9
+          new[] {
+            22,
+            9,
+            23,
+            10
+          }
         };
       }
     }

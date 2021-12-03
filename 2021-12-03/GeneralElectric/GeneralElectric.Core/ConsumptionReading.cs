@@ -12,6 +12,8 @@ namespace GeneralElectric.Core
       get; private set;
     }
 
+
+
     public ConsumptionReading(string rawReading)
     {
       Readings = rawReading.ToCharArray().Select((c) =>
