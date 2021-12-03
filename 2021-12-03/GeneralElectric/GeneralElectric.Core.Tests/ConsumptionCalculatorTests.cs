@@ -83,14 +83,14 @@ namespace GeneralElectric.Core.Tests
     {
       get
       {
-        /*yield return new object[]
+        yield return new object[]
         {
           new[] {new ConsumptionReading("0")},
           new[] {
             0,
             1,
             0,
-            1
+            0
           }
         };
 
@@ -101,9 +101,9 @@ namespace GeneralElectric.Core.Tests
             1,
             0,
             1,
-            0
+            1
           }
-        };*/
+        };
 
         yield return new object[]
         {
