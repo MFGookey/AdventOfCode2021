@@ -18,7 +18,7 @@ namespace AdventOfCode.Template.Cmd
       var filePath = "./input";
       var reader = new FileReader();
       Console.WriteLine(reader.ReadFile(filePath).Length);
-      Console.WriteLine("Hello World!");
+      _ = Console.ReadLine();
     }
   }
 }
