@@ -34,6 +34,12 @@ namespace SquidGame.Cmd
       var winningBoard = processor.PlayUntilBingo();
       Console.WriteLine(winningBoard.Score);
 
+      // Reset the game
+      // Turns out this isn't necessary.  Thanks, me!
+      //processor = new BingoGameProcessor(draws, boards);
+
+      var lastWinningBoard = processor.PlayUntilLastBoardWins();
+      Console.WriteLine(lastWinningBoard.Score);
       _ = Console.ReadLine();
     }
   }

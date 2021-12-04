@@ -22,7 +22,7 @@ namespace SquidGame.Core.Tests
     }
 
     [Fact]
-    void BingoGameProcessor_GivenValidDrawsAndBoard_WhenPlayed_DoesNotThrowException()
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayed_DoesNotThrowException()
     {
       var sut = new BingoGameProcessor(Draws, Boards);
       var exception = Record.Exception(
@@ -33,7 +33,7 @@ namespace SquidGame.Core.Tests
     }
 
     [Fact]
-    void BingoGameProcessor_GivenValidDrawsAndBoard_WhenPlayed_ReturnsExpectedBoardScoring()
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayed_ReturnsExpectedBoardScoring()
     {
       var sut = new BingoGameProcessor(Draws, Boards);
       var winningBoard = sut.PlayUntilBingo();
@@ -41,6 +41,29 @@ namespace SquidGame.Core.Tests
       Assert.True(winningBoard.HasWon);
       Assert.Equal(188, winningBoard.UnmarkedSum);
       Assert.Equal(4512, winningBoard.Score);
+    }
+
+    [Fact]
+    
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLasWinningBoard_DoesNotThrowException()
+    {
+      var sut = new BingoGameProcessor(Draws, Boards);
+      var exception = Record.Exception(
+        () => sut.PlayUntilLastBoardWins()
+      );
+
+      Assert.Null(exception);
+    }
+
+    [Fact]
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLasWinningBoard_ReturnsExpectedBoardScoring()
+    {
+      var sut = new BingoGameProcessor(Draws, Boards);
+      var winningBoard = sut.PlayUntilLastBoardWins();
+
+      Assert.True(winningBoard.HasWon);
+      Assert.Equal(148, winningBoard.UnmarkedSum);
+      Assert.Equal(1924, winningBoard.Score);
     }
 
     public static readonly string Draws = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1";

@@ -57,5 +57,33 @@ namespace SquidGame.Core
 
       throw new Exception("Ran out of draws and nobody has won!");
     }
+
+    public BingoBoard PlayUntilLastBoardWins()
+    {
+      var unWonBoards = _boards.Where(board => board.HasWon == false).ToList();
+
+      foreach (var draw in _draws)
+      {
+        LastDraw = draw;
+        foreach (var board in unWonBoards)
+        {
+          board.Mark(draw);
+        }
+
+        if (unWonBoards.Count() == 1)
+        {
+          if (unWonBoards.First().HasWon)
+          {
+            return unWonBoards.First();
+          }
+        }
+        else
+        {
+          unWonBoards = unWonBoards.Where(board => board.HasWon == false).ToList();
+        }
+      }
+
+      throw new Exception($"Ran out of draws and there is still {unWonBoards.Count()} unwon boards!");
+    }
   }
 }
