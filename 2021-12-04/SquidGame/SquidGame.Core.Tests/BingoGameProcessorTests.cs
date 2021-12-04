@@ -45,7 +45,7 @@ namespace SquidGame.Core.Tests
 
     [Fact]
     
-    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLasWinningBoard_DoesNotThrowException()
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLastWinningBoard_DoesNotThrowException()
     {
       var sut = new BingoGameProcessor(Draws, Boards);
       var exception = Record.Exception(
@@ -56,7 +56,7 @@ namespace SquidGame.Core.Tests
     }
 
     [Fact]
-    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLasWinningBoard_ReturnsExpectedBoardScoring()
+    void BingoGameProcessor_GivenValidDrawsAndBoards_WhenPlayedToLastWinningBoard_ReturnsExpectedBoardScoring()
     {
       var sut = new BingoGameProcessor(Draws, Boards);
       var winningBoard = sut.PlayUntilLastBoardWins();
