@@ -44,9 +44,9 @@ namespace HVAC.Core
       End = new Point(coordinatePairs[1][0], coordinatePairs[1][1]);
     }
 
-    public bool IsManhattanLine()
+    public bool IsLineWeCareAbout(Func<Point, Point, bool> rule)
     {
-      return Start.IsManhattanAligned(End);
+      return rule(Start, End);
     }
 
     public int LowX()
@@ -69,11 +69,11 @@ namespace HVAC.Core
       return Start.Y > End.Y ? Start.Y : End.Y;
     }
 
-    public IEnumerable<Point> GenerateLinePoints()
+    public IEnumerable<Point> GenerateLinePoints(Func<Point, Point, bool> rule)
     {
-      if (this.IsManhattanLine() == false)
+      if (this.IsLineWeCareAbout(rule) == false)
       {
-        throw new Exception("Currently we will only process vertical or horizontal lines");
+        throw new Exception("Currently we will only process lines which follow the provided rule.");
       }
 
       if (this.LowX() == this.HighX())
@@ -95,14 +95,36 @@ namespace HVAC.Core
       }
       else
       {
-        // This is a horizontal line with a changing X.
-        return Enumerable.Range(
-            this.LowX(),
-            this.HighX() - this.LowX() + 1
-          )
-          .Select(x => new Point(x, Start.Y))
-          .OrderBy(p => p.X)
-          .ToList();
+        if (this.LowY() == this.HighY())
+        {
+          // This is a horizontal line with a changing X.
+          return Enumerable.Range(
+              this.LowX(),
+              this.HighX() - this.LowX() + 1
+            )
+            .Select(x => new Point(x, Start.Y))
+            .OrderBy(p => p.X)
+            .ToList();
+        }
+        else
+        {
+          // This is a diagonal line with X and Y changing by the same steps.
+
+          // Figure out which point has a lower X value
+          var lowerX = new[] { Start, End }.OrderBy(p => p.X).First();
+          var higherX = new[] { Start, End }.OrderBy(p => p.X).Last();
+
+          var xValues = Enumerable.Range(lowerX.X, (higherX.X - lowerX.X + 1)).ToList();
+          var yValues = Enumerable.Range(Math.Min(higherX.Y, lowerX.Y), (Math.Max(higherX.Y, lowerX.Y) - Math.Min(higherX.Y, lowerX.Y) + 1)).OrderBy(y => lowerX.Y < higherX.Y ? y : -y).ToList();
+
+          List<Point> results = new List<Point>();
+          for (var i = 0; i < xValues.Count(); i++)
+          {
+            results.Add(new Point(xValues[i], yValues[i]));
+          }
+
+          return results;
+        }
       }
     }
   }

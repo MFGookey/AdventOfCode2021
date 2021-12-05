@@ -26,6 +26,18 @@ namespace HVAC.Core
       return (this.X == other.X || this.Y == other.Y);
     }
 
+    public bool IsDiagonallyAligned(Point other)
+    {
+      // we are diagonally aligned if the change in X == the change in Y between the two points
+      return (
+        Math.Max(this.X, other.X) - Math.Min(this.X, other.X)
+      )
+      ==
+      (
+        Math.Max(this.Y, other.Y) - Math.Min(this.Y, other.Y)
+      );
+    }
+
     public bool Equals([AllowNull] Point other)
     {
       if (other is null)

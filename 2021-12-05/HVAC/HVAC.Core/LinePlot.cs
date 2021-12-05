@@ -12,7 +12,6 @@ namespace HVAC.Core
 
     public LinePlot(IEnumerable<string> lineDefinitions)
     {
-      _heatMap = new Dictionary<Point, int>();
       var plottedLines = new List<Line>();
       foreach (var definition in lineDefinitions)
       {
@@ -22,17 +21,16 @@ namespace HVAC.Core
       _lines = plottedLines;
     }
 
-    public void GenerateHeatMap()
+    public void GenerateHeatMap(Func<Point, Point, bool> rule)
     {
-      foreach (var line in _lines.Where(l => l.IsManhattanLine()))
+      _heatMap = new Dictionary<Point, int>();
+      foreach (var line in _lines.Where(l => l.IsLineWeCareAbout(rule)))
       {
-        foreach (var point in line.GenerateLinePoints())
+        foreach (var point in line.GenerateLinePoints(rule))
         {
           if (_heatMap.ContainsKey(point))
           {
-            var currentValue = _heatMap[point];
-            currentValue++;
-            _heatMap[point] = currentValue;
+            _heatMap[point]++;
           }
           else
           {

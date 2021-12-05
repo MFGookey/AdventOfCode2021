@@ -22,9 +22,11 @@ namespace HVAC.Cmd
       var lines = formatter.FormatFile(filePath, "\n", true, true);
 
       var plot = new LinePlot(lines);
-      plot.GenerateHeatMap();
+      plot.GenerateHeatMap((start, end) => start.IsManhattanAligned(end));
       Console.WriteLine(plot.CountHeatAboveThreshold(2));
 
+      plot.GenerateHeatMap((start, end) => start.IsManhattanAligned(end) || start.IsDiagonallyAligned(end));
+      Console.WriteLine(plot.CountHeatAboveThreshold(2));
 
       _ = Console.ReadLine();
     }

@@ -23,10 +23,17 @@ namespace HVAC.Core.Tests
 
     [Theory]
     [MemberData(nameof(PointComparisonData))]
-    void Point_WhenComparingManhattanAlignment_ReturnsExpectedAlignmentValue(int x, int y, Point other, bool expectedAlignment)
+    void Point_WhenComparingAlignments_ReturnsExpectedAlignmentValue(
+      int x,
+      int y,
+      Point other,
+      bool expectedManhattanAlignment,
+      bool expectedDiagonalAlignment
+    )
     {
       var sut = new Point(x, y);
-      Assert.Equal(expectedAlignment, sut.IsManhattanAligned(other));
+      Assert.Equal(expectedManhattanAlignment, sut.IsManhattanAligned(other));
+      Assert.Equal(expectedDiagonalAlignment, sut.IsDiagonallyAligned(other));
     }
 
     [Theory]
@@ -63,6 +70,7 @@ namespace HVAC.Core.Tests
           10,
           10,
           new Point(10, 10),
+          true,
           true
         };
 
@@ -71,7 +79,8 @@ namespace HVAC.Core.Tests
           2,
           6,
           new Point(2, 235423),
-          true
+          true,
+          false
         };
 
         yield return new object[]
@@ -79,7 +88,8 @@ namespace HVAC.Core.Tests
           98,
           23,
           new Point(0, 23),
-          true
+          true,
+          false
         };
 
         yield return new object[]
@@ -87,7 +97,26 @@ namespace HVAC.Core.Tests
           -10,
           10,
           new Point(10, 235423),
+          false,
           false
+        };
+
+        yield return new object[]
+        {
+          1,
+          1,
+          new Point(3, 3),
+          false,
+          true
+        };
+
+        yield return new object[]
+        {
+          9,
+          7,
+          new Point(7, 9),
+          false,
+          true
         };
       }
     }

@@ -37,7 +37,7 @@ namespace HVAC.Core.Tests
     void Line_GivenValidDefinition_IsManhattanLineAsExpected(string definition, bool expectedManhattanLine)
     {
       var sut = new Line(definition);
-      Assert.Equal(expectedManhattanLine, sut.IsManhattanLine());
+      Assert.Equal(expectedManhattanLine, sut.IsLineWeCareAbout((start, end) => start.IsManhattanAligned(end)));
     }
 
     [Theory]
@@ -58,16 +58,16 @@ namespace HVAC.Core.Tests
     void Line_GivenManhattanLineDefinition_WhenGeneratingLinePoints_DoesNotThrowExceptions(string definition)
     {
       var sut = new Line(definition);
-      var exception = Record.Exception(() => sut.GenerateLinePoints());
+      var exception = Record.Exception(() => sut.GenerateLinePoints((start, end) => start.IsManhattanAligned(end) || start.IsDiagonallyAligned(end)));
       Assert.Null(exception);
     }
 
     [Theory]
-    [MemberData(nameof(NonManhattanLineDefinitions))]
+    [MemberData(nameof(DontCareLineDefinitions))]
     void Line_GivenNonManhattanLineDefinition_WhenGeneratingLinePoints_ThrowsExceptions(string definition)
     {
       var sut = new Line(definition);
-      Assert.Throws<Exception>(() => sut.GenerateLinePoints());
+      Assert.Throws<Exception>(() => sut.GenerateLinePoints((start, end) => start.IsManhattanAligned(end) || start.IsDiagonallyAligned(end)));
     }
 
     [Fact]
@@ -79,7 +79,7 @@ namespace HVAC.Core.Tests
       Assert.Equal(1, sut.LowX());
       Assert.Equal(4, sut.HighX());
 
-      var linePoints = sut.GenerateLinePoints();
+      var linePoints = sut.GenerateLinePoints((start, end) => start.IsManhattanAligned(end));
       Assert.Single(linePoints.Select(p => p.Y).Distinct());
       Assert.Equal(new[] { 1, 2, 3, 4 }, linePoints.Select(p => p.X).OrderBy(i => i));
     }
@@ -93,9 +93,36 @@ namespace HVAC.Core.Tests
       Assert.Equal(1, sut.LowX());
       Assert.Equal(1, sut.HighX());
 
-      var linePoints = sut.GenerateLinePoints();
+      var linePoints = sut.GenerateLinePoints((start, end) => start.IsManhattanAligned(end));
       Assert.Single(linePoints.Select(p => p.X).Distinct());
       Assert.Equal(new[] { 4, 5, 6, 7, 8, 9 }, linePoints.Select(p => p.Y).OrderBy(i => i));
+    }
+
+    [Theory]
+    [MemberData(nameof(DiagonalLinePoints))]
+    void Line_GivenDiagonalDefinition_GeneratesExpectedLinePoints(string definition, IEnumerable<Point> expectedPoints)
+    {
+      var sut = new Line(definition);
+      var linePoints = sut.GenerateLinePoints((start, end) => start.IsDiagonallyAligned(end));
+      Assert.Equal(expectedPoints.OrderBy(p => p.X), linePoints.OrderBy(p=> p.X));
+    }
+
+    [Theory]
+    [MemberData(nameof(DiagonalAndManhattanLinePoints))]
+    void Line_GivenDiagonalAndManhattanDefinition_GeneratesExpectedLinePoints(string definition, IEnumerable<Point> expectedPoints)
+    {
+      var sut = new Line(definition);
+      var linePoints = sut.GenerateLinePoints((start, end) => start.IsManhattanAligned(end) || start.IsDiagonallyAligned(end)).OrderBy(p => p.X).ThenBy(p => p.Y);
+
+      Assert.Equal(expectedPoints.OrderBy(p => p.X).ThenBy(p => p.Y), linePoints);
+    }
+
+    [Theory]
+    [MemberData(nameof(DiagonalLineDefinitions))]
+    void Line_GivenDiagonalDefinitions_IsLineWeCareAbout(string definition)
+    {
+      var sut = new Line(definition);
+      Assert.True(sut.IsLineWeCareAbout((start, end) => (start.IsDiagonallyAligned(end))));
     }
 
     public static IEnumerable<object[]> BadLineDefinitions
@@ -147,13 +174,94 @@ namespace HVAC.Core.Tests
       }
     }
 
-    public static IEnumerable<object[]> NonManhattanLineDefinitions
+    public static IEnumerable<object[]> DiagonalLineDefinitions
+    {
+      get
+      {
+        yield return new object[] { "1,1 -> 3,3" };
+        yield return new object[] { "9,7 -> 7,9" };
+      }
+    }
+
+    public static IEnumerable<object[]> DontCareLineDefinitions
     {
       get
       {
         yield return new object[] { "120,104 -> 10,10" };
         yield return new object[] { "12412,6 -> 2,235423" };
         yield return new object[] { "98,2323 -> 0,23" };
+      }
+    }
+
+    public static IEnumerable<object[]> DiagonalLinePoints
+    {
+      get
+      {
+        yield return new object[] {
+          "1,1 -> 3,3",
+          new[]
+          {
+            new Point(1,1),
+            new Point(2,2),
+            new Point(3,3)
+          }
+        };
+        yield return new object[] {
+          "9,7 -> 7,9",
+          new[]
+          {
+            new Point(9,7),
+            new Point(8,8),
+            new Point(7,9)
+          }
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> DiagonalAndManhattanLinePoints
+    {
+      get
+      {
+        yield return new object[] {
+          "1,1 -> 3,3",
+          new[]
+          {
+            new Point(1,1),
+            new Point(2,2),
+            new Point(3,3)
+          }
+        };
+
+        yield return new object[] {
+          "9,7 -> 7,9",
+          new[]
+          {
+            new Point(9,7),
+            new Point(8,8),
+            new Point(7,9)
+          }
+        };
+
+        yield return new object[] {
+          "1,1 -> 1,3",
+          new[]
+          {
+            new Point(1,1),
+            new Point(1,2),
+            new Point(1,3)
+          }
+        };
+
+        yield return new object[] {
+          "9,7 -> 7,7",
+          new[]
+          {
+            new Point(9,7),
+            new Point(8,7),
+            new Point(7,7)
+          }
+        };
+
       }
     }
   }
