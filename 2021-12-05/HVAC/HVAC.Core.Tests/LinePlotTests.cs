@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Xunit;
+
+namespace HVAC.Core.Tests
+{
+  public class LinePlotTests
+  {
+    [Fact]
+    void LinePlot_GivenValidLineDefinitions_DoesNotThrowException()
+    {
+      var exception = Record.Exception(() => _ = new LinePlot(SampleLines));
+
+      Assert.Null(exception);
+    }
+
+    [Fact]
+    void LinePlot_GivenValidLineDefinitions_GeneratesExpectedHotSpots()
+    {
+      var sut = new LinePlot(SampleLines);
+      sut.GenerateHeatMap();
+      Assert.Equal(5, sut.CountHeatAboveThreshold(2));
+    }
+
+    public static IEnumerable<string> SampleLines
+    {
+      get {
+        return new[]
+        {
+          "0,9 -> 5,9",
+          "8,0 -> 0,8",
+          "9,4 -> 3,4",
+          "2,2 -> 2,1",
+          "7,0 -> 7,4",
+          "6,4 -> 2,0",
+          "0,9 -> 2,9",
+          "3,4 -> 1,4",
+          "0,0 -> 8,8",
+          "5,5 -> 8,2"
+        };
+      }
+    }
+  }
+}
