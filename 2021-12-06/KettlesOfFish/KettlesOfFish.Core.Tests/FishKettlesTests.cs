@@ -115,6 +115,16 @@ namespace KettlesOfFish.Core.Tests
       );
     }
 
+    [Fact]
+    void Tick_GivenLargeTicks_CalculatesCorrectPopulation()
+    {
+      var adultInterval = 7;
+      var childInterval = 2;
+      var sut = new FishKettles(InitialState, adultInterval, childInterval);
+      sut.Tick(256);
+      Assert.Equal(26984457539, sut.CurrentPopulation);
+    }
+
     private static IEnumerable<string> InitialState = new[]
     {
       "3",

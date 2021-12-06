@@ -28,6 +28,10 @@ namespace KettlesOfFish.Cmd
 
       Console.WriteLine(kettles.CurrentPopulation);
 
+      // keep ticking until 256 total ticks
+      kettles.Tick(256 - 80);
+      Console.WriteLine(kettles.CurrentPopulation);
+
       _ = Console.ReadLine();
     }
   }

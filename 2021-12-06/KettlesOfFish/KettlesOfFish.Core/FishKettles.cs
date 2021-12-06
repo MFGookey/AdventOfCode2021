@@ -10,8 +10,8 @@ namespace KettlesOfFish.Core
   {
     private readonly CircularIndex _adultCurrentDayPointer;
     private readonly CircularIndex _childhoodCurrentDayPointer;
-    private int[] _adultKettles;
-    private int[] _childKettles;
+    private Int64[] _adultKettles;
+    private Int64[] _childKettles;
 
     public FishKettles(IEnumerable<string> fish, int adultReproductionInterval, int childhoodInterval)
     {
@@ -32,13 +32,13 @@ namespace KettlesOfFish.Core
       }
 
       var unkettledFish = fish
-        .Select(i => int.Parse(i)) // Turn our string ints into real ints
+        .Select(i => Int64.Parse(i)) // Turn our string ints into real ints
         .GroupBy(i => i) // We want to count the fish with each distinct value
         .Select(
           g => new
           {
             timeToReproduce = g.Key,
-            populationSize = g.Count()
+            populationSize = g.LongCount()
           }
         );
 
@@ -57,8 +57,8 @@ namespace KettlesOfFish.Core
 
       _adultCurrentDayPointer = new CircularIndex(adultReproductionInterval);
       _childhoodCurrentDayPointer = new CircularIndex(childhoodInterval);
-      _adultKettles = new int[adultReproductionInterval];
-      _childKettles = new int[childhoodInterval];
+      _adultKettles = new Int64[adultReproductionInterval];
+      _childKettles = new Int64[childhoodInterval];
 
       foreach (var k in unkettledFish)
       {
@@ -67,7 +67,7 @@ namespace KettlesOfFish.Core
       }
     }
 
-    public int CurrentPopulation
+    public Int64 CurrentPopulation
     {
       get
       {
@@ -90,7 +90,7 @@ namespace KettlesOfFish.Core
 
       // And now the fun part starts
 
-      int maturingChildren;
+      Int64 maturingChildren;
 
       for (int i = 0; i < timesToTick; i++)
       {
