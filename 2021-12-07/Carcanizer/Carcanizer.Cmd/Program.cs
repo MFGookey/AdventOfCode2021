@@ -22,7 +22,9 @@ namespace Carcanizer.Cmd
       var crabNavy = formatter.FormatFile(filePath, ",", true, true).Select(s => s.Replace("\n", string.Empty));
 
       var commander = new CrabCommander(crabNavy);
-      Console.WriteLine(commander.CalculateCrabsOfTheLinePositionCost());
+      Console.WriteLine(commander.CalculateCrabsOfTheLinePositionCost(CrabCommander.FlatConsumptionRule));
+
+      Console.WriteLine(commander.CalculateCrabsOfTheLinePositionCost(CrabCommander.SumConsumptionRule));
 
       _ = Console.ReadLine();
     }

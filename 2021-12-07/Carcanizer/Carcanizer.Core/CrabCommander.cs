@@ -11,6 +11,10 @@ namespace Carcanizer.Core
 
     private readonly IEnumerable<int> _armada;
 
+    public static readonly Func<int, int> FlatConsumptionRule = new Func<int, int> ((distance) => distance);
+
+    public static readonly Func<int, int> SumConsumptionRule = new Func<int, int>((distance) => (distance * (distance + 1) / 2));
+
     public CrabCommander(IEnumerable<string> crabs)
     {
       if (crabs.Any(c => Regex.IsMatch(c, @"[^\d]")))
@@ -21,7 +25,7 @@ namespace Carcanizer.Core
       _armada = crabs.Select(c => int.Parse(c));
     }
 
-    public int CalculateCrabsOfTheLinePositionCost()
+    public int CalculateCrabsOfTheLinePositionCost(Func<int, int> consumptionRule)
     {
       // Given a list of positions, find the ONE position that minimizes the aggregate difference between each position and the position you want.
       // I mean, uh, fuel efficiency.
@@ -40,7 +44,7 @@ namespace Carcanizer.Core
             .Select(
               // for each crab in the armada, calculate the cost
               // to get to the position we are considering
-              c => Math.Abs(c - r)
+              c => consumptionRule(Math.Abs(c - r))
             )
             // Total up the costs aross the armada
             // to move to the position we are considering
@@ -53,7 +57,6 @@ namespace Carcanizer.Core
       .First()
       // and return the cost
       .cost;
-
     }
   }
 }

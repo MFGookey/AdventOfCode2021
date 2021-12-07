@@ -15,16 +15,21 @@ namespace Carcanizer.Core.Tests
     }
 
     [Fact]
-    void CrabCommander_GivenSingleton_WhenCalculatingCost_ReturnsSingleton()
+    void CrabCommander_GivenSingleton_WhenCalculatingFlatCost_ReturnsSingleton()
     {
       var sut = new CrabCommander(new[] { "42" });
-      Assert.Equal(0, sut.CalculateCrabsOfTheLinePositionCost());
+      Assert.Equal(0, sut.CalculateCrabsOfTheLinePositionCost(CrabCommander.FlatConsumptionRule));
     }
 
-
+    [Fact]
+    void CrabCommander_GivenSingleton_WhenCalculatingSumCost_ReturnsSingleton()
+    {
+      var sut = new CrabCommander(new[] { "42" });
+      Assert.Equal(0, sut.CalculateCrabsOfTheLinePositionCost(CrabCommander.SumConsumptionRule));
+    }
 
     [Fact]
-    void CrabCommander_GivenKnownList_WhenCalculatingCost_ReturnsExpectedValue()
+    void CrabCommander_GivenKnownList_WhenCalculatingFlatCost_ReturnsExpectedValue()
     {
       var demoList = new[] {
         "16",
@@ -40,7 +45,27 @@ namespace Carcanizer.Core.Tests
       };
 
       var sut = new CrabCommander(demoList);
-      Assert.Equal(37, sut.CalculateCrabsOfTheLinePositionCost());
+      Assert.Equal(37, sut.CalculateCrabsOfTheLinePositionCost(CrabCommander.FlatConsumptionRule));
+    }
+
+    [Fact]
+    void CrabCommander_GivenKnownList_WhenCalculatingSumCost_ReturnsExpectedValue()
+    {
+      var demoList = new[] {
+        "16",
+        "1",
+        "2",
+        "0",
+        "4",
+        "2",
+        "7",
+        "1",
+        "2",
+        "14"
+      };
+
+      var sut = new CrabCommander(demoList);
+      Assert.Equal(168, sut.CalculateCrabsOfTheLinePositionCost(CrabCommander.SumConsumptionRule));
     }
   }
 }
