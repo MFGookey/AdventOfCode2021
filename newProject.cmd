@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 pushd %~dp0
 
-powershell -File ./newProject.ps1 %1 %2
+powershell -NoLogo -NoProfile -File ./newProject.ps1 %1 %2
 popd
 
 pause & exit /b
