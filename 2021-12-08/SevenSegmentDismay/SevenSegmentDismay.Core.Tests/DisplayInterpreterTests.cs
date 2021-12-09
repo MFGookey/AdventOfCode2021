@@ -24,6 +24,15 @@ namespace SevenSegmentDismay.Core.Tests
       Assert.Equal(26, sut.FindUniqueDisplayedDigitsTotal());
     }
 
+
+
+    [Fact]
+    public void FindSumOfDisplays_ReturnsExpectedSum()
+    {
+      var sut = new DisplayInterpreter(SampleTestCycles);
+      Assert.Equal(61229, sut.FindSumOfDisplays());
+    }
+
     public static IEnumerable<string> SampleTestCycles = new[] {
       "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe",
       "edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc",

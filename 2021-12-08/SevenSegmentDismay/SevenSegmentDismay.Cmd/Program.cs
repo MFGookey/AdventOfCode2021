@@ -24,7 +24,7 @@ namespace SevenSegmentDismay.Cmd
 
       var interpreter = new DisplayInterpreter(rawRecords);
       Console.WriteLine(interpreter.FindUniqueDisplayedDigitsTotal());
-
+      Console.WriteLine(interpreter.FindSumOfDisplays());
       _ = Console.ReadLine();
     }
   }

@@ -111,8 +111,6 @@ namespace SevenSegmentDismay.Core.Tests
       Assert.Equal(appended, sut.AppendByRows(leftDisplayRows, interstitial));
     }
 
-
-
     [Fact]
     public void AppendByRows_ReturnsExpectedStrings()
     {
@@ -146,6 +144,91 @@ namespace SevenSegmentDismay.Core.Tests
     {
       var sut = new Display("fc"); // Equivalent to ONE
       Assert.False(sut.Equals(Display.FOUR));
+    }
+
+    [Theory]
+    [MemberData(nameof(SegmentIdentifierData))]
+    public void SegmentIdentifiers_MatchingKnownNumbers_AreEquivalent(string segments, Display expectedMatch)
+    {
+      var sut = new Display(segments);
+      Assert.Equal(expectedMatch, sut);
+    }
+
+    [Theory]
+    [MemberData(nameof(InvalidMappings))]
+    public void Remap_GivenInvalidMapping_ThrowsArgumentException(Dictionary<string, string> mapping)
+    {
+      Assert.Throws<ArgumentException>(() => _ = Display.ZERO.Remap(mapping));
+    }
+
+    [Theory]
+
+    // Sample test cycle
+    [InlineData("acedgfb", 8)]
+    [InlineData("cdfbe", 5)]
+    [InlineData("gcdfa", 2)]
+    [InlineData("fbcad", 3)]
+    [InlineData("dab", 7)]
+    [InlineData("cefabd", 9)]
+    [InlineData("cdfgeb", 6)]
+    [InlineData("eafb", 4)]
+    [InlineData("cagedb", 0)]
+    [InlineData("ab", 1)]
+
+    // Sample reading
+    [InlineData("cdfeb", 5)]
+    [InlineData("fcadb", 3)]
+    [InlineData("cbfde", 5)] // Altered segments to be unique but equivalent
+    [InlineData("cdbaf", 3)]
+    public void Remap_GivenValidRemapping_ReturnsExpectedValue(string segments, int postMappedValue)
+    {
+      var mapping = new Dictionary<string, string>
+      {
+        {"d", "a" },
+        {"e", "b" },
+        {"a", "c" },
+        {"f", "d" },
+        {"g", "e" },
+        {"b", "f" },
+        {"c", "g" }
+      };
+
+      var initialDisplay = new Display(segments);
+      var sut = initialDisplay.Remap(mapping);
+      Assert.Equal(postMappedValue, sut.ReadDisplay());
+    }
+
+    [Theory]
+    [InlineData("abcefg", 0)]  // Zero
+    [InlineData("cf", 1)]      // One
+    [InlineData("acdeg", 2)]   // Two
+    [InlineData("acdfg", 3)]   // Three
+    [InlineData("bcdf", 4)]    // Four
+    [InlineData("abdfg", 5)]   // Five
+    [InlineData("abdefg", 6)]  // Six
+    [InlineData("acf", 7)]     // Seven
+    [InlineData("abcdefg", 8)] // Eight
+    [InlineData("abcdfg", 9)]  // Nine
+    public void ReadDisplay_GivenValidDisplay_ReturnsExpectedValue(string segments, int readValue)
+    {
+      var sut = new Display(segments);
+      Assert.Equal(readValue, sut.ReadDisplay());
+    }
+
+    [Theory]
+    [InlineData("cdfbe")]
+    [InlineData("cdfa")]
+    [InlineData("fbcad")]
+    [InlineData("dab")]
+    [InlineData("cefabd")]
+    [InlineData("cdfgeb")]
+    [InlineData("eafb")]
+    [InlineData("cagedb")]
+    [InlineData("ab")]
+    public void ReadDisplay_GivenInValidDisplay_ThrowsInvalidOPerationException(string segments)
+    {
+      var sut = new Display(segments);
+      Assert.Throws<InvalidOperationException>(() => _ = sut.ReadDisplay());
     }
 
     public static IEnumerable<object[]> DisplayByRowsData
@@ -299,6 +382,211 @@ namespace SevenSegmentDismay.Core.Tests
             ".    f",
             ".    f",
             " gggg "
+          }
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> SegmentIdentifierData
+    {
+      get
+      {
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_LEFT + 
+          Display.TOP_RIGHT +
+          Display.BOTTOM_LEFT +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.ZERO
+        };
+
+        yield return new object[]
+        {
+          Display.TOP_RIGHT +
+          Display.BOTTOM_RIGHT,
+          Display.ONE
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_RIGHT +
+          Display.MIDDLE +
+          Display.BOTTOM_LEFT +
+          Display.BOTTOM,
+          Display.TWO
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_RIGHT +
+          Display.MIDDLE +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.THREE
+        };
+
+        yield return new object[]
+        {
+          Display.TOP_LEFT +
+          Display.TOP_RIGHT +
+          Display.MIDDLE +
+          Display.BOTTOM_RIGHT,
+          Display.FOUR
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_LEFT +
+          Display.MIDDLE +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.FIVE
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_LEFT +
+          Display.MIDDLE +
+          Display.BOTTOM_LEFT +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.SIX
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_RIGHT +
+          Display.BOTTOM_RIGHT,
+          Display.SEVEN
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_LEFT +
+          Display.TOP_RIGHT +
+          Display.MIDDLE +
+          Display.BOTTOM_LEFT +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.EIGHT
+        };
+
+        yield return new object[]
+        {
+          Display.TOP +
+          Display.TOP_LEFT +
+          Display.TOP_RIGHT +
+          Display.MIDDLE +
+          Display.BOTTOM_RIGHT +
+          Display.BOTTOM,
+          Display.NINE
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> InvalidMappings
+    {
+      get
+      {
+        yield return new object[]
+        {
+          null
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>()
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"d", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" }
+          }
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"d", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" },
+            {"c", "g" },
+            {string.Empty, string.Empty }
+          }
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"d", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" },
+            {"c", "f" }
+          }
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"dd", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" },
+            {"c", "g" }
+          }
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"d", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" },
+            {"q", "g" }
+          }
+        };
+
+        yield return new object[]
+        {
+          new Dictionary<string, string>
+          {
+            {"d", "a" },
+            {"e", "b" },
+            {"a", "c" },
+            {"f", "d" },
+            {"g", "e" },
+            {"b", "f" },
+            {"c", "q" }
           }
         };
       }

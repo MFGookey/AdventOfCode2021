@@ -38,12 +38,38 @@ namespace SevenSegmentDismay.Core
       return TestCycles
         .Select(
           test =>
-            test
-            .DisplayReading
-            .Count(
-              display => 
-              uniqueByLitSegmentCount.Contains(display.LitSegmentCount)
+            FindDisplaysByLitSegments(
+              test.DisplayReading,
+              uniqueByLitSegmentCount
             )
+            .Count()
+            )
+        .Sum();
+    }
+
+    private IEnumerable<Display> FindDisplaysByLitSegments(IEnumerable<Display> haystack, IEnumerable<int> needles)
+    {
+      var foundDisplays = new List<Display>();
+
+      foreach(var needle in needles)
+      {
+        foundDisplays.AddRange(
+          FindDisplaysByLitSegments(haystack, needle)
+        );
+      }
+
+      return foundDisplays;
+    }
+
+    private IEnumerable<Display> FindDisplaysByLitSegments(IEnumerable<Display> haystack, int needle)
+    {
+      return haystack.Where(item => item.LitSegmentCount == needle);
+    }
+
+    public int FindSumOfDisplays()
+    {
+      return TestCycles.Select(
+          t => t.DetermineReading()
         )
         .Sum();
     }
