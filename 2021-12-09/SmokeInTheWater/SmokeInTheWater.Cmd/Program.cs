@@ -23,7 +23,8 @@ namespace SmokeInTheWater.Cmd
 
       var plot = new DepthPlot(fileByRows);
 
-      Console.WriteLine(plot.FindRiskLevels(DepthPlot.BasicRule).Sum());
+      Console.WriteLine(plot.FindRiskLevels(DepthPlot.BasicRiskRule).Sum());
+      Console.WriteLine(plot.FindBasinAggregateRisk());
 
       _ = Console.ReadLine();
     }
