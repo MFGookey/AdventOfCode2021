@@ -9,7 +9,7 @@ namespace LiterallyMyThesis.Core.Tests
   public class LineScannerTests
   {
     [Theory]
-    [MemberData(nameof(GoodCharactersWithScores))]
+    [MemberData(nameof(GoodCharactersWithSyntaxErrorScores))]
     public void BasicScoreMapping_GivenValidCharacter_ReturnsExpectedScore(char character, int expectedScore)
     {
       Assert.Equal(expectedScore, LineScanner.BasicScoreMapping(character));
@@ -21,6 +21,22 @@ namespace LiterallyMyThesis.Core.Tests
     {
       Assert.Throws<ArgumentOutOfRangeException>(
         () => _ = LineScanner.BasicScoreMapping(character)
+      );
+    }
+
+    [Theory]
+    [MemberData(nameof(GoodCharactersWithCompletionScores))]
+    public void CompletionScoreMapping_GivenValidCharacter_ReturnsExpectedScore(char character, int expectedScore)
+    {
+      Assert.Equal(expectedScore, LineScanner.CompletionScoreMapping(character));
+    }
+
+    [Theory]
+    [MemberData(nameof(BadCharacters))]
+    public void CompletionScoreMapping_GivenInvalidCharacter_ThrowsArgumentOutOfRangeException(char character)
+    {
+      Assert.Throws<ArgumentOutOfRangeException>(
+        () => _ = LineScanner.CompletionScoreMapping(character)
       );
     }
 
@@ -54,9 +70,11 @@ namespace LiterallyMyThesis.Core.Tests
     public void LineScanner_GivenGoodLine_SetsPropertiesAsExpected(string line)
     {
       var sut = new LineScanner(line);
-      Assert.Null(sut.Score);
+      Assert.Null(sut.SyntaxErrorScore);
       Assert.Equal(line, sut.Line);
       Assert.Null(sut.SyntaxError);
+      Assert.Null(sut.IsComplete);
+      Assert.Null(sut.CompletionScore);
     }
 
     [Theory]
@@ -75,8 +93,9 @@ namespace LiterallyMyThesis.Core.Tests
       var sut = new LineScanner(toScan);
       sut.ScanLine();
       Assert.False(sut.SyntaxError);
-      Assert.NotNull(sut.Score);
-      Assert.Equal(0, sut.Score);
+      Assert.NotNull(sut.SyntaxErrorScore);
+      Assert.Equal(0, sut.SyntaxErrorScore);
+      Assert.True(sut.CompletionScore.HasValue);
     }
 
     [Theory]
@@ -96,8 +115,9 @@ namespace LiterallyMyThesis.Core.Tests
       sut.ScanLine();
       Assert.True(sut.SyntaxError);
       Assert.False(sut.IsComplete);
-      Assert.NotNull(sut.Score);
-      Assert.Equal(expectedScore, sut.Score);
+      Assert.NotNull(sut.SyntaxErrorScore);
+      Assert.Equal(expectedScore, sut.SyntaxErrorScore);
+      Assert.False(sut.CompletionScore.HasValue);
     }
 
     [Theory]
@@ -108,8 +128,10 @@ namespace LiterallyMyThesis.Core.Tests
       sut.ScanLine();
       Assert.False(sut.SyntaxError);
       Assert.True(sut.IsComplete);
-      Assert.NotNull(sut.Score);
-      Assert.Equal(0, sut.Score);
+      Assert.NotNull(sut.SyntaxErrorScore);
+      Assert.Equal(0, sut.SyntaxErrorScore);
+      Assert.True(sut.CompletionScore.HasValue);
+      Assert.Equal(0, sut.CompletionScore.Value);
     }
 
     [Theory]
@@ -120,8 +142,24 @@ namespace LiterallyMyThesis.Core.Tests
       sut.ScanLine();
       Assert.False(sut.SyntaxError);
       Assert.False(sut.IsComplete);
-      Assert.NotNull(sut.Score);
-      Assert.Equal(0, sut.Score);
+      Assert.NotNull(sut.SyntaxErrorScore);
+      Assert.Equal(0, sut.SyntaxErrorScore);
+      Assert.True(sut.CompletionScore.HasValue);
+      Assert.True(sut.CompletionScore > 0);
+    }
+
+    [Theory]
+    [MemberData(nameof(GoodIncompleteLinesWithCompletionScores))]
+    public void ScanLine_GivenGoodIncompleteLines_SetsCompletionScoreAsExpected(string toScan, int completionScore)
+    {
+      var sut = new LineScanner(toScan);
+      sut.ScanLine();
+      Assert.False(sut.SyntaxError);
+      Assert.False(sut.IsComplete);
+      Assert.NotNull(sut.SyntaxErrorScore);
+      Assert.Equal(0, sut.SyntaxErrorScore);
+      Assert.True(sut.CompletionScore.HasValue);
+      Assert.Equal(completionScore, sut.CompletionScore);
     }
 
     // This is really dumb but it isn't every day I can cover the
@@ -146,7 +184,7 @@ namespace LiterallyMyThesis.Core.Tests
       }
     }
 
-    public static IEnumerable<object[]> GoodCharactersWithScores
+    public static IEnumerable<object[]> GoodCharactersWithSyntaxErrorScores
     {
       get
       {
@@ -156,6 +194,20 @@ namespace LiterallyMyThesis.Core.Tests
           new object[] { ']', 57 },
           new object[] { '}', 1197 },
           new object[] { '>', 25137 },
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> GoodCharactersWithCompletionScores
+    {
+      get
+      {
+        return new List<object[]>
+        {
+          new object[] { ')', 1 },
+          new object[] { ']', 2 },
+          new object[] { '}', 3 },
+          new object[] { '>', 4 },
         };
       }
     }
@@ -186,6 +238,23 @@ namespace LiterallyMyThesis.Core.Tests
         yield return new[] { "<([{" };
         yield return new[] { "[<>({}){}[([])<" };
         yield return new[] { "(((((((((()))))" };
+      }
+    }
+
+    public static IEnumerable<object[]> GoodIncompleteLinesWithCompletionScores
+    {
+      get
+      {
+        yield return new object[] { "(", 1};
+        yield return new object[] { "[", 2 };
+        yield return new object[] { "{", 3 };
+        yield return new object[] { "<", 4 };
+        yield return new object[] { "[({(<(())[]>[[{[]{<()<>>", 288957 };
+        yield return new object[] { "[(()[<>])]({[<{<<[]>>(", 5566};
+        yield return new object[] { "(((({<>}<{<{<>}{[]{[]{}", 1480781 };
+        yield return new object[] { "{<[[]]>}<{[{[{[]{()[[[]", 995444 };
+        yield return new object[] { "<{([{{}}[<[[[<>{}]]]>[]]", 294 };
+
       }
     }
 

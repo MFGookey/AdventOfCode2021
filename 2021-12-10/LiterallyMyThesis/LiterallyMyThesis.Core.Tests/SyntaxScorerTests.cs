@@ -41,12 +41,20 @@ namespace LiterallyMyThesis.Core.Tests
     }
 
     [Theory]
-    [MemberData(nameof(GoodLineCollectionsWithScores))]
-    public void ScoreLines_GivenLines_ReturnsExpectedScore(IEnumerable<string> lines, int expectedScore)
+    [MemberData(nameof(GoodLineCollectionsWithSyntaxErrorScores))]
+    public void ScoreLines_GivenLines_ReturnsExpectedSyntaxErrorScore(IEnumerable<string> lines, int expectedScore)
     {
       var sut = new SyntaxScorer(lines);
 
       Assert.Equal(expectedScore, sut.ScoreLines());
+    }
+
+    [Theory]
+    [MemberData(nameof(GoodIncompleteLineCollectionsWithCompletionScores))]
+    public void ScoreLines_GivenIncompleteLines_ReturnsExpectedCompletionScore(IEnumerable<string> lines, int expectedScore)
+    {
+      var sut = new SyntaxScorer(lines);
+      Assert.Equal(expectedScore, sut.ScoreLineCompletion());
     }
 
     public static IEnumerable<object[]> GoodLineCollections
@@ -98,7 +106,7 @@ namespace LiterallyMyThesis.Core.Tests
       }
     }
 
-    public static IEnumerable<object[]> GoodLineCollectionsWithScores
+    public static IEnumerable<object[]> GoodLineCollectionsWithSyntaxErrorScores
     {
       get
       {
@@ -146,6 +154,30 @@ namespace LiterallyMyThesis.Core.Tests
             "(((((((((()))))"
           },
           0
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> GoodIncompleteLineCollectionsWithCompletionScores
+    {
+      get
+      {
+        yield return new object[]
+        {
+          new List<string>
+          {
+            "[({(<(())[]>[[{[]{<()<>>",
+            "[(()[<>])]({[<{<<[]>>(",
+            "{([(<{}[<>[]}>{[]{[(<()>",
+            "(((({<>}<{<{<>}{[]{[]{}",
+            "[[<[([]))<([[{}[[()]]]",
+            "[{[{({}]{}}([{[{{{}}([]",
+            "{<[[]]>}<{[{[{[]{()[[[]",
+            "[<(<(<(<{}))><([]([]()",
+            "<{([([[(<>()){}]>(<<{{",
+            "<{([{{}}[<[[[<>{}]]]>[]]"
+          },
+          288957
         };
       }
     }

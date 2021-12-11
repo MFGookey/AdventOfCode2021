@@ -22,6 +22,7 @@ namespace LiterallyMyThesis.Cmd
       var lines = formatter.FormatFile(filePath, "\n", true, true);
       var scorer = new SyntaxScorer(lines);
       Console.WriteLine(scorer.ScoreLines());
+      Console.WriteLine(scorer.ScoreLineCompletion());
       _ = Console.ReadLine();
     }
   }

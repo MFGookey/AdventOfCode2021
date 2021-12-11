@@ -26,6 +26,25 @@ namespace LiterallyMyThesis.Core
       }
     );
 
+    public static readonly Func<char, int> CompletionScoreMapping = new Func<char, int>(
+      (character) =>
+      {
+        switch (character)
+        {
+          case ')':
+            return 1;
+          case ']':
+            return 2;
+          case '}':
+            return 3;
+          case '>':
+            return 4;
+          default:
+            throw new ArgumentOutOfRangeException("Allowable scorable characters are ), ], }, and >.", character, nameof(character));
+        }
+      }
+    );
+
     private static readonly Func<char, bool> _shouldPush = new Func<char, bool>(
       (character) =>
       {
@@ -58,6 +77,25 @@ namespace LiterallyMyThesis.Core
       }
     );
 
+    private static readonly Func<char, char> _mapClosingMatch = new Func<char, char>(
+      (opening) =>
+      {
+        switch (opening)
+        {
+          case '(':
+            return ')';
+          case '[':
+            return ']';
+          case '{':
+            return '}';
+          case '<':
+            return '>';
+          default:
+            throw new ArgumentException($"Could not match up {opening} with a closing character");
+        }
+      }
+    );
+
     private static readonly Func<char, char, bool> _checkMatch = new Func<char, char, bool>(
       (opening, closing) =>
       {
@@ -83,7 +121,7 @@ namespace LiterallyMyThesis.Core
       private set;
     }
 
-    public int? Score
+    public int? SyntaxErrorScore
     {
       get;
       private set;
@@ -99,8 +137,14 @@ namespace LiterallyMyThesis.Core
     {
       get
       {
-        return Score == null ? (bool?)null : Score > 0;
+        return SyntaxErrorScore == null ? (bool?)null : SyntaxErrorScore > 0;
       }
+    }
+
+    public Int64? CompletionScore
+    {
+      get;
+      private set;
     }
 
     public LineScanner(string line)
@@ -115,7 +159,8 @@ namespace LiterallyMyThesis.Core
         throw new ArgumentException("Lines may only be made up of (, ), [, ], {, }, <, or > characters.", nameof(line));
       }
 
-      Score = null;
+      SyntaxErrorScore = null;
+      CompletionScore = null;
       IsComplete = null;
       Line = line;
     }
@@ -135,7 +180,7 @@ namespace LiterallyMyThesis.Core
         {
           if (openingCharacters.TryPop(out var opening) == false || _checkMatch(opening, c) == false)
           {
-            Score = LineScanner.BasicScoreMapping(c);
+            SyntaxErrorScore = LineScanner.BasicScoreMapping(c);
             IsComplete = false;
             return;
           }
@@ -146,8 +191,21 @@ namespace LiterallyMyThesis.Core
         }
       }
 
-      Score = 0;
+      SyntaxErrorScore = 0;
       IsComplete = openingCharacters.Count == 0;
+      CompleteLine(openingCharacters);
+    }
+
+    private void CompleteLine(Stack<char> openingCharacters)
+    {
+      Int64 runningScore = 0;
+
+      while (openingCharacters.TryPop(out var opening))
+      {
+        runningScore = runningScore * 5 + CompletionScoreMapping(_mapClosingMatch(opening));
+      }
+
+      CompletionScore = runningScore;
     }
   }
 }
