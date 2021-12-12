@@ -137,6 +137,26 @@ namespace Twinklepus.Core.Tests
       }
     }
 
+    [Theory]
+    [MemberData(nameof(SynchronizedFlashGrids))]
+    public void TickUntilSynchronized_StopsAtCorrectTickCount(
+      IEnumerable<string> startingGrid,
+      int expectedFirstSynchronizedFlash
+    )
+    {
+      var sut = new OctoGrid(startingGrid);
+      Assert.Equal(string.Join("\n", startingGrid), sut.ToString());
+      Assert.Equal(0, sut.FlashCount);
+      Assert.Null(sut.FirstSynchronizedFlash);
+
+      sut.TickUntilSynchronized();
+      Assert.NotNull(sut.FirstSynchronizedFlash);
+      Assert.Equal(
+        expectedFirstSynchronizedFlash,
+        sut.FirstSynchronizedFlash.Value
+      );
+    }
+
     public static IEnumerable<object[]> SingleStepGrids
     {
       get
@@ -718,6 +738,54 @@ namespace Twinklepus.Core.Tests
                 "7922286866",
                 "6789998766"
               }
+            },
+            {
+              193,
+              new string[]
+              {
+                "5877777777",
+                "8877777777",
+                "7777777777",
+                "7777777777",
+                "7777777777",
+                "7777777777",
+                "7777777777",
+                "7777777777",
+                "7777777777",
+                "7777777777"
+              }
+            },
+            {
+              194,
+              new string[]
+              {
+                "6988888888",
+                "9988888888",
+                "8888888888",
+                "8888888888",
+                "8888888888",
+                "8888888888",
+                "8888888888",
+                "8888888888",
+                "8888888888",
+                "8888888888"
+              }
+            },
+            {
+              195,
+              new string[]
+              {
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000",
+                "0000000000"
+              }
             }
           },
           new Dictionary<int, Int64>
@@ -725,6 +793,30 @@ namespace Twinklepus.Core.Tests
             { 10, 204 },
             { 100, 1656 }
           }
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> SynchronizedFlashGrids
+    {
+      get
+      {
+        yield return new object[]
+        {
+          new string[]
+          {
+            "5483143223",
+            "2745854711",
+            "5264556173",
+            "6141336146",
+            "6357385478",
+            "4167524645",
+            "2176841721",
+            "6882881134",
+            "4846848554",
+            "5283751526"
+          },
+          195
         };
       }
     }

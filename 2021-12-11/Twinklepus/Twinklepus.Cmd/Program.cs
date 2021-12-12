@@ -23,6 +23,8 @@ namespace Twinklepus.Cmd
       var grid = new OctoGrid(formatter.FormatFile(filePath, "\n", true, true));
       grid.TickUntil(100);
       Console.WriteLine(grid.FlashCount);
+      grid.TickUntilSynchronized();
+      Console.Write(grid.FirstSynchronizedFlash.Value);
       _ = Console.ReadLine();
     }
   }

@@ -19,6 +19,12 @@ namespace Twinklepus.Core
 
     private int _tickCount;
 
+    public int? FirstSynchronizedFlash
+    {
+      get;
+      private set;
+    }
+
     public OctoGrid(IEnumerable<string> initialEnergyLevels)
     {
       // Disallow null collection
@@ -41,6 +47,7 @@ namespace Twinklepus.Core
 
       FlashCount = 0;
       _tickCount = 0;
+      FirstSynchronizedFlash = null;
 
       // Set up our grid of octopi
       Octopi = initialEnergyLevels
@@ -88,6 +95,11 @@ namespace Twinklepus.Core
 
       FlashCount += Octopi.SelectMany(o => o).LongCount(o => o.FlashedThisTick);
 
+      if (FirstSynchronizedFlash.HasValue == false && Octopi.SelectMany(o => o).LongCount(o => o.FlashedThisTick) == Octopi.SelectMany(o => o).LongCount())
+      {
+        FirstSynchronizedFlash = _tickCount;
+      }
+
       // Now complete the tick process
       foreach (var octopus in Octopi.SelectMany(o => o))
       {
@@ -111,6 +123,14 @@ namespace Twinklepus.Core
     public void TickUntil(int endingTickCount)
     {
       while (_tickCount < endingTickCount)
+      {
+        Tick();
+      }
+    }
+
+    public void TickUntilSynchronized()
+    {
+      while (FirstSynchronizedFlash.HasValue == false)
       {
         Tick();
       }
