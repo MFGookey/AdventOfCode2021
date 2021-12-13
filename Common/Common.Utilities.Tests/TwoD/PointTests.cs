@@ -13,6 +13,7 @@ namespace Common.Utilities.Tests.TwoD
     {
       var sut = new Point(12, 6346);
       Assert.Equal(12, sut.Row);
+      Assert.Equal(12, sut.Y);
     }
 
     [Fact]
@@ -20,6 +21,7 @@ namespace Common.Utilities.Tests.TwoD
     {
       var sut = new Point(-38, 894);
       Assert.Equal(894, sut.Column);
+      Assert.Equal(894, sut.X);
     }
 
     [Theory]
@@ -65,6 +67,14 @@ namespace Common.Utilities.Tests.TwoD
     {
       var sut = new Point(row, column);
       Assert.Equal(expectedToString, sut.ToString());
+    }
+
+    [Theory]
+    [MemberData(nameof(PointToXYStringData))]
+    void Point_WhenToStringXYIsCalled_ReturnsExpectedString(int X, int Y, string expectedToString)
+    {
+      var sut = new Point(Y, X);
+      Assert.Equal(expectedToString, sut.ToXYString());
     }
 
     public static IEnumerable<object[]> PointComparisonData
@@ -166,6 +176,61 @@ namespace Common.Utilities.Tests.TwoD
     }
 
     public static IEnumerable<object[]> PointToStringData
+    {
+      get
+      {
+        yield return new object[]
+        {
+          10,
+          10,
+          "10,10"
+        };
+
+        yield return new object[]
+        {
+          2,
+          6,
+          "2,6"
+        };
+
+        yield return new object[]
+        {
+          98,
+          23,
+          "98,23"
+        };
+
+        yield return new object[]
+        {
+          -10,
+          10,
+          "-10,10"
+        };
+
+        yield return new object[]
+        {
+          2,
+          235423,
+          "2,235423"
+        };
+
+        yield return new object[]
+        {
+          0,
+          23,
+          "0,23"
+        };
+
+        yield return new object[]
+        {
+          10,
+          235423,
+          "10,235423"
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> PointToXYStringData
     {
       get
       {
