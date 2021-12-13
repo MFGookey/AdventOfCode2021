@@ -26,6 +26,8 @@ namespace IRigami.Cmd
       var sheet = new FoldableSheet(coordinates, folds);
       sheet.Tick();
       Console.WriteLine(sheet.CountVisiblePoints());
+      sheet.TickUntilDone();
+      Console.Write(sheet.Plot());
 
       _ = Console.ReadLine();
     }

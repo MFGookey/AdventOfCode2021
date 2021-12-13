@@ -63,6 +63,14 @@ namespace IRigami.Core
       _folds.Dequeue()();
     }
 
+    public void TickUntilDone()
+    {
+      while (_folds.Any())
+      {
+        Tick();
+      }
+    }
+
     public int CountVisiblePoints()
     {
       return _points.Distinct().Count();
