@@ -49,7 +49,11 @@ namespace Spelunker.Core
       }
     }
 
-    public IEnumerable<string> Traverse(string start, string end)
+    public IEnumerable<string> Traverse(
+      string start,
+      string end,
+      Func<Node, IEnumerable<Node>, bool> visitRule
+    )
     {
       var startNode = new Node(start);
       if (_nodes.Contains(startNode) == false)
@@ -69,7 +73,8 @@ namespace Spelunker.Core
       return Traverse(
         startNode,
         endNode,
-        queue
+        queue,
+        visitRule
       )
       .Distinct();
 
@@ -78,7 +83,8 @@ namespace Spelunker.Core
     private IEnumerable<string> Traverse(
       Node current,
       Node destination,
-      Queue<Node> route
+      Queue<Node> route,
+      Func<Node, IEnumerable<Node>, bool> visitRule
     )
     {
       var returnList = new List<string>();
@@ -94,15 +100,15 @@ namespace Spelunker.Core
         var nextRound = _edges
           .Where(e => e.Connects(current))
           .SelectMany(e => e.ConnectedNodes.Where(n => n.Equals(current) == false))
-          .Where(n => n.CanVisit(route));
-
-        
+          .Where(n => visitRule(n, route));
 
         foreach (var node in nextRound)
         {
           var newQueue = new Queue<Node>(route.ToList());
           newQueue.Enqueue(node);
-          returnList = returnList.Concat(Traverse(node, destination, newQueue)).ToList();
+          returnList = returnList.Concat(
+            Traverse(node, destination, newQueue, visitRule)
+          ).ToList();
         }
       }
 

@@ -21,7 +21,8 @@ namespace Spelunker.Cmd
       var formatter = new RecordFormatter(new FileReader());
       var graph = new Graph(formatter.FormatFile(filePath, "\n", true, true));
 
-      Console.WriteLine(graph.Traverse("start", "end").Count());
+      Console.WriteLine(graph.Traverse("start", "end", Node.CanVisitRule).Count());
+      Console.WriteLine(graph.Traverse("start", "end", Node.CanRevisitRule).Count());
       _ = Console.ReadLine();
     }
   }

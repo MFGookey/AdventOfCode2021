@@ -46,8 +46,8 @@ namespace Spelunker.Core.Tests
     }
 
     [Theory]
-    [MemberData(nameof(ValidGraphsWithPathCounts))]
-    public void Traverse_GivenValidNodes_ReturnsExpectedCount(
+    [MemberData(nameof(ValidGraphsWithVisitRulePathCounts))]
+    public void Traverse_GivenValidNodes_ReturnsExpectedVisitRuleCount(
       IEnumerable<string> graph,
       string startingNode,
       string endingNode,
@@ -57,13 +57,13 @@ namespace Spelunker.Core.Tests
       var sut = new Graph(graph);
       Assert.Equal(
         expectedPathCount,
-        sut.Traverse(startingNode, endingNode).Count()
+        sut.Traverse(startingNode, endingNode, Node.CanVisitRule).Count()
       );
     }
 
     [Theory]
-    [MemberData(nameof(ValidGraphsWithPathResults))]
-    public void Traverse_GivenValidNodes_ReturnsExpectedResults(
+    [MemberData(nameof(ValidGraphsWithVisitRulePathResults))]
+    public void Traverse_GivenValidNodes_ReturnsExpectedVisitRuleResults(
       IEnumerable<string> graph,
       string startingNode,
       string endingNode,
@@ -73,7 +73,47 @@ namespace Spelunker.Core.Tests
       var sut = new Graph(graph);
       Assert.Equal(
         expectedPaths.OrderBy(s=>s),
-        sut.Traverse(startingNode, endingNode).OrderBy(s=>s)
+        sut.Traverse(
+          startingNode,
+          endingNode,
+          Node.CanVisitRule
+        ).OrderBy(s=>s)
+      );
+    }
+
+    [Theory]
+    [MemberData(nameof(ValidGraphsWithRevisitRulePathCounts))]
+    public void Traverse_GivenValidNodes_ReturnsExpectedRevisitRuleCount(
+      IEnumerable<string> graph,
+      string startingNode,
+      string endingNode,
+      int expectedPathCount
+    )
+    {
+      var sut = new Graph(graph);
+      Assert.Equal(
+        expectedPathCount,
+        sut.Traverse(startingNode, endingNode, Node.CanRevisitRule).Count()
+      );
+    }
+    
+    [Theory]
+    [MemberData(nameof(ValidGraphsWithRevisitRulePathResults))]
+    public void Traverse_GivenValidNodes_ReturnsExpectedRevisitRuleResults(
+      IEnumerable<string> graph,
+      string startingNode,
+      string endingNode,
+      IEnumerable<string> expectedPaths
+    )
+    {
+      var sut = new Graph(graph);
+      Assert.Equal(
+        expectedPaths.OrderBy(s => s),
+        sut.Traverse(
+          startingNode,
+          endingNode,
+          Node.CanRevisitRule
+        ).OrderBy(s => s)
       );
     }
 
@@ -144,7 +184,7 @@ namespace Spelunker.Core.Tests
       }
     } 
 
-    public static IEnumerable<object[]> ValidGraphsWithPathCounts
+    public static IEnumerable<object[]> ValidGraphsWithVisitRulePathCounts
     {
       get
       {
@@ -215,7 +255,7 @@ namespace Spelunker.Core.Tests
       }
     }
 
-    public static IEnumerable<object[]> ValidGraphsWithPathResults
+    public static IEnumerable<object[]> ValidGraphsWithVisitRulePathResults
     {
       get
       {
@@ -286,6 +326,138 @@ namespace Spelunker.Core.Tests
             "start,kj,HN,end",
             "start,kj,dc,HN,end",
             "start,kj,dc,end"
+          }
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> ValidGraphsWithRevisitRulePathCounts
+    {
+      get
+      {
+        yield return new object[]
+        {
+          new List<string>
+          {
+            "start-A",
+            "start-b",
+            "A-c",
+            "A-b",
+            "b-d",
+            "A-end",
+            "b-end"
+          },
+          "start",
+          "end",
+          36
+        };
+
+        yield return new object[]
+        {
+          new List<string>
+          {
+            "dc-end",
+            "HN-start",
+            "start-kj",
+            "dc-start",
+            "dc-HN",
+            "LN-dc",
+            "HN-end",
+            "kj-sa",
+            "kj-HN",
+            "kj-dc"
+          },
+          "start",
+          "end",
+          103
+        };
+
+        yield return new object[]
+        {
+          new List<string>
+          {
+            "fs-end",
+            "he-DX",
+            "fs-he",
+            "start-DX",
+            "pj-DX",
+            "end-zg",
+            "zg-sl",
+            "zg-pj",
+            "pj-he",
+            "RW-he",
+            "fs-DX",
+            "pj-RW",
+            "zg-RW",
+            "start-pj",
+            "he-WI",
+            "zg-he",
+            "pj-fs",
+            "start-RW"
+          },
+          "start",
+          "end",
+          3509
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> ValidGraphsWithRevisitRulePathResults
+    {
+      get
+      {
+        yield return new object[]
+        {
+          new List<string>
+          {
+            "start-A",
+            "start-b",
+            "A-c",
+            "A-b",
+            "b-d",
+            "A-end",
+            "b-end"
+          },
+          "start",
+          "end",
+          new List<string>
+          {
+            "start,A,b,A,b,A,c,A,end",
+            "start,A,b,A,b,A,end",
+            "start,A,b,A,b,end",
+            "start,A,b,A,c,A,b,A,end",
+            "start,A,b,A,c,A,b,end",
+            "start,A,b,A,c,A,c,A,end",
+            "start,A,b,A,c,A,end",
+            "start,A,b,A,end",
+            "start,A,b,d,b,A,c,A,end",
+            "start,A,b,d,b,A,end",
+            "start,A,b,d,b,end",
+            "start,A,b,end",
+            "start,A,c,A,b,A,b,A,end",
+            "start,A,c,A,b,A,b,end",
+            "start,A,c,A,b,A,c,A,end",
+            "start,A,c,A,b,A,end",
+            "start,A,c,A,b,d,b,A,end",
+            "start,A,c,A,b,d,b,end",
+            "start,A,c,A,b,end",
+            "start,A,c,A,c,A,b,A,end",
+            "start,A,c,A,c,A,b,end",
+            "start,A,c,A,c,A,end",
+            "start,A,c,A,end",
+            "start,A,end",
+            "start,b,A,b,A,c,A,end",
+            "start,b,A,b,A,end",
+            "start,b,A,b,end",
+            "start,b,A,c,A,b,A,end",
+            "start,b,A,c,A,b,end",
+            "start,b,A,c,A,c,A,end",
+            "start,b,A,c,A,end",
+            "start,b,A,end",
+            "start,b,d,b,A,c,A,end",
+            "start,b,d,b,A,end",
+            "start,b,d,b,end",
+            "start,b,end"
           }
         };
       }

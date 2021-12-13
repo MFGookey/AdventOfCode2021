@@ -63,6 +63,30 @@ namespace Spelunker.Core.Tests
       Assert.Equal(expectedEquality, sut.Equals(toCompare));
     }
 
+    [Theory]
+    [MemberData(nameof(NodeVisitChecks))]
+    public void CanVisit_GivenVistedNodes_ReturnsExpectedValue(
+      string name,
+      IEnumerable<Node> visitedNodes,
+      bool expectedValue
+    )
+    {
+      var sut = new Node(name);
+      Assert.Equal(expectedValue, sut.CanVisit(visitedNodes));
+    }
+
+    [Theory]
+    [MemberData(nameof(NodeRevisitChecks))]
+    public void CanRevisit_GivenVistedNodes_ReturnsExpectedValue(
+      string name,
+      IEnumerable<Node> visitedNodes,
+      bool expectedValue
+    )
+    {
+      var sut = new Node(name);
+      Assert.Equal(expectedValue, sut.CanRevisit(visitedNodes));
+    }
+
     public static IEnumerable<object[]> NodeEqualityData
     {
       get
@@ -92,6 +116,179 @@ namespace Spelunker.Core.Tests
         {
           "name",
           new Node("NAME"),
+          false
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> NodeVisitChecks
+    {
+      get
+      {
+        yield return new object[]
+        {
+          "a",
+          new List<Node>(),
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>(),
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("a")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("a")
+          },
+          false
+        };
+      }
+    }
+
+    public static IEnumerable<object[]> NodeRevisitChecks
+    {
+      get
+      {
+        yield return new object[]
+        {
+          "a",
+          new List<Node>(),
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>(),
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("a")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("a")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("A"),
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("A"),
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "A",
+          new List<Node>{
+            new Node("a"),
+            new Node("A")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("a"),
+            new Node("a")
+          },
+          false
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("b"),
+            new Node("a")
+          },
+          true
+        };
+
+        yield return new object[]
+        {
+          "a",
+          new List<Node>{
+            new Node("b"),
+            new Node("b"),
+            new Node("a")
+          },
           false
         };
       }

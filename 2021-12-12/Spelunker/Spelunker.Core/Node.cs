@@ -14,6 +14,14 @@ namespace Spelunker.Core
       private set;
     }
 
+    public static readonly Func<Node, IEnumerable<Node>, bool> CanVisitRule = new Func<Node, IEnumerable<Node>, bool>(
+        (current, route) => current.CanVisit(route)
+      );
+
+    public static readonly Func<Node, IEnumerable<Node>, bool> CanRevisitRule = new Func<Node, IEnumerable<Node>, bool>(
+        (current, route) => current.CanRevisit(route)
+      );
+
     public Node(string name)
     {
       if (name == null)
@@ -84,6 +92,27 @@ namespace Spelunker.Core
       }
 
       return true;
+    }
+
+    public bool CanRevisit(IEnumerable<Node> visitedNodes)
+    {
+      return
+        (
+          this.CanVisit(visitedNodes)
+          || (
+          // to get here means we've visited this node once before
+          // so now all we need to do is ensure that no lower case node has been visited twice
+            false == visitedNodes
+              .Where(n => n.Name.Equals(n.Name.ToLowerInvariant()))
+              .Select(n => n.Name)
+              .GroupBy(n => n)
+              .Select(g => g.Count())
+              .Where(n => n > 1)
+              .Any()
+            && this.Name.Equals("start") == false
+            && this.Name.Equals("end") == false
+          )
+        );
     }
   }
 }

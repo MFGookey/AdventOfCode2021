@@ -69,18 +69,6 @@ namespace Spelunker.Core.Tests
       Assert.Equal(2, sut.ConnectedNodes.Count());
     }
 
-    [Theory]
-    [MemberData(nameof(NodeVisitChecks))]
-    public void CanVisit_GivenVistedNodes_ReturnsExpectedValue(
-      string name,
-      IEnumerable<Node> visitedNodes,
-      bool expectedValue
-    )
-    {
-      var sut = new Node(name);
-      Assert.Equal(expectedValue, sut.CanVisit(visitedNodes));
-    }
-
     public static IEnumerable<object[]> NodesWithNulls
     {
       get
@@ -101,62 +89,6 @@ namespace Spelunker.Core.Tests
         {
           null,
           null
-        };
-      }
-    }
-
-    public static IEnumerable<object[]> NodeVisitChecks
-    {
-      get
-      {
-        yield return new object[]
-        {
-          "a",
-          new List<Node>(),
-          true
-        };
-
-        yield return new object[]
-        {
-          "A",
-          new List<Node>(),
-          true
-        };
-
-        yield return new object[]
-        {
-          "A",
-          new List<Node>{
-            new Node("A")
-          },
-          true
-        };
-
-        yield return new object[]
-        {
-          "a",
-          new List<Node>{
-            new Node("A")
-          },
-          true
-        };
-
-        yield return new object[]
-        {
-          "A",
-          new List<Node>{
-            new Node("a")
-          },
-          true
-        };
-
-        yield return new object[]
-        {
-          "a",
-          new List<Node>{
-            new Node("a")
-          },
-          false
         };
       }
     }
