@@ -67,13 +67,12 @@ namespace Spelunker.Core
         throw new ArgumentException($"Graph does not contain {end}", nameof(end));
       }
 
-      var queue = new Queue<Node>();
-      queue.Enqueue(startNode);
+      var route = new Stack<Node>();
 
       return Traverse(
         startNode,
         endNode,
-        queue,
+        route,
         visitRule
       )
       .Distinct();
@@ -83,16 +82,19 @@ namespace Spelunker.Core
     private IEnumerable<string> Traverse(
       Node current,
       Node destination,
-      Queue<Node> route,
+      Stack<Node> route,
       Func<Node, IEnumerable<Node>, bool> visitRule
     )
     {
       var returnList = new List<string>();
 
+      route.Push(current);
+
+
       // right now current is the last entry on the stack
       if (current.Equals(destination))
       {
-        returnList.Add(string.Join(",", route.ToList()));
+        returnList.Add(string.Join(",", route.Reverse()));
       }
       else
       {
@@ -104,13 +106,13 @@ namespace Spelunker.Core
 
         foreach (var node in nextRound)
         {
-          var newQueue = new Queue<Node>(route.ToList());
-          newQueue.Enqueue(node);
           returnList = returnList.Concat(
-            Traverse(node, destination, newQueue, visitRule)
+            Traverse(node, destination, route, visitRule)
           ).ToList();
         }
       }
+
+      _ = route.Pop();
 
       return returnList;
     }
