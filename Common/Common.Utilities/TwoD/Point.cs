@@ -19,6 +19,22 @@ namespace Common.Utilities.TwoD
       private set;
     }
 
+    public int X
+    {
+      get
+      {
+        return Column;
+      }
+    }
+
+    public int Y
+    {
+      get
+      {
+        return Row;
+      }
+    }
+
     public Point(int row, int column)
     {
       Row = row;
@@ -38,6 +54,11 @@ namespace Common.Utilities.TwoD
     public override string ToString()
     {
       return $"{Row},{Column}";
+    }
+
+    public string ToXYString()
+    {
+      return $"{X},{Y}";
     }
 
     public override int GetHashCode()
